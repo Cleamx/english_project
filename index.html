@@ -4,15 +4,34 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Présentation de l'équipe — profils, compétences et contact.">
+    <meta name="theme-color" content="#6366f1">
     <title>Team</title>
     <link rel="stylesheet" href="style.css">
     <script src="data.js"></script>
 </head>
 
 <body>
+    <a class="skip-link" href="#mainPage">Aller au contenu</a>
+    <header class="site-header" role="banner">
+        <div class="container header-inner">
+            <a class="logo" href="index.html">Equipe — M2 indexOf</a>
+            <nav class="main-nav" aria-label="Navigation principale">
+                <button class="nav-toggle" aria-expanded="false" aria-controls="mainNav">☰</button>
+                <ul id="mainNav" class="nav-list">
+                    <li><a href="index.html">Équipe</a></li>
+                    <li><a href="profile.html">Exemple profil</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
     <div class="container" id="mainPage">
-        <h1>Our team</h1>
-        <div class="filters" id="filters"></div>
+        <div class="controls">
+            <div class="search-wrap">
+                <input id="searchInput" type="search" placeholder="Rechercher un membre..." aria-label="Rechercher un membre">
+            </div>
+            <div class="filters" id="filters" hidden></div>
+        </div>
         <div class="team-grid" id="teamGrid">
         </div>
     </div>
@@ -72,7 +91,8 @@
             consulting: "Consulting"
         };
 
-        let currentFilter = 'all';
+    let currentFilter = 'all';
+    let searchTerm = '';
 
         function generateFilters() {
             const filtersEl = document.getElementById('filters');
@@ -103,7 +123,8 @@
             const teamGrid = document.getElementById('teamGrid');
             teamGrid.innerHTML = '';
 
-            const filtered = currentFilter === 'all' ? teamMembers : teamMembers.filter(m => m.group === currentFilter);
+            const byGroup = currentFilter === 'all' ? teamMembers : teamMembers.filter(m => m.group === currentFilter);
+            const filtered = searchTerm.trim() === '' ? byGroup : byGroup.filter(m => (m.name || '').toLowerCase().includes(searchTerm.toLowerCase()));
 
             filtered.forEach((member) => {
                 const card = document.createElement('div');
@@ -125,6 +146,42 @@
                 `;
 
                 teamGrid.appendChild(card);
+            });
+        }
+
+        // small search integration
+        const searchInput = document.getElementById('searchInput');
+        if (searchInput) {
+            searchInput.addEventListener('input', (e) => {
+                searchTerm = e.target.value || '';
+                generateTeamCards();
+            });
+        }
+
+        // filter toggle button (shows / hides the filters area)
+        const filterToggle = document.getElementById('filterToggle');
+        const filtersEl = document.getElementById('filters');
+        if (filterToggle && filtersEl) {
+            filterToggle.addEventListener('click', () => {
+                const isHidden = filtersEl.hasAttribute('hidden');
+                if (isHidden) {
+                    filtersEl.removeAttribute('hidden');
+                    filterToggle.setAttribute('aria-expanded', 'true');
+                } else {
+                    filtersEl.setAttribute('hidden', '');
+                    filterToggle.setAttribute('aria-expanded', 'false');
+                }
+            });
+        }
+
+        // responsive nav toggle
+        const navToggle = document.querySelector('.nav-toggle');
+        if (navToggle) {
+            navToggle.addEventListener('click', () => {
+                const nav = document.getElementById('mainNav');
+                const expanded = navToggle.getAttribute('aria-expanded') === 'true';
+                navToggle.setAttribute('aria-expanded', String(!expanded));
+                nav.classList.toggle('open');
             });
         }
 
